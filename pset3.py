@@ -9,6 +9,8 @@ from string import *
 target1 = 'atgacatgcacaagtatgcat'
 target2 = 'atgaatgcatggatgtaaatgcag'
 
+target3 = 'atafgd' #non-sense test 
+
 # key strings
 
 key10 = 'a'
