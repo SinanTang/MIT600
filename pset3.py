@@ -1,23 +1,55 @@
 from string import *
 
-# this is a code file that you can use as a template for submitting your solutions
-
 # these are some example strings for use in testing your code
 
 #  target strings
-
 target1 = 'atgacatgcacaagtatgcat'
 target2 = 'atgaatgcatggatgtaaatgcag'
 
-target3 = 'atafgd' #non-sense test 
 
 # key strings
-
 key10 = 'a'
 key11 = 'atg'
 key12 = 'atgc'
 key13 = 'atgca'
+key14 = 'ab'
 
+# print find(target1, key11), find(target1, key11, 6), find(target1, key11, 5)
+
+### Problem 1: 2 functions to count the number of instances of a string in the target
+def countSubStringMatch(target, key):
+    counter = []
+    for i in range(len(target)):
+        match = find(target, key, i)
+        try: match == -1
+        except: return 0
+        # print match
+        if match not in counter:
+            counter.append(match)
+            # print counter
+    return len(counter)-1
+
+# print countSubStringMatch(target1, key10), countSubStringMatch(target2, key12), countSubStringMatch(target1, key14)
+
+
+def countSubStringMatchRecursive(target, key):
+    match = find(target, key)
+    # match = target.find(key) # for Python 3
+    if match == -1:
+        return 0 # the base case
+    else:
+        target = target[match + (len(key) or 1):]
+        print target
+        return 1 + countSubStringMatchRecursive(target, key)
+    # '1+' is essential here, so every recursive cycle can add 1 to the result
+
+# print countSubStringMatchRecursive(target1, key14), countSubStringMatchRecursive(target1, key11)
+
+### Problem 2: return a tuple of start indexes where the key string matches in the target string (can be iterative or recursive)
+
+# def subStringMatchExact(target, key):
+
+### Problem 3:
 
 ### the following procedure you will use in Problem 3
 
