@@ -75,4 +75,83 @@ def testBi():
     print "squareRootBi(0.25, 0.0001)"
     squareRootBi(0.25, 0.0001)
 
-testBi()
+# testBi()
+
+
+### Lecture 6
+# speed of convergence (of bisection methods)
+# Newton/Raphson method
+
+def squareRootNR(x, epsilon):
+    """Assume x >= 0 and epsilon > 0
+    Return y s.t. y*y is within epsilon of x"""
+    assert x>= 0, "x must be non-negative, not" + str(x)
+    assert epsilon > 0, "epsilon must be positive, not" + str(epsilon)
+    x = float(x)
+    guess = x/2.0 # experimenting with different guesses
+    # guess = 0.001
+    diff = guess**2 - x
+    ctr = 1
+    while abs(diff) > epsilon and ctr <= 100:
+        # print 'Error:', diff, 'guess:' guess
+        guess = guess - diff/(2.0*guess)
+        diff = guess**2 - x
+        ctr += 1
+    assert ctr <= 100, "Iteration count exceeded"
+    print "NR method. Num. iteration:", ctr, "Estimate:", guess
+    return guess
+
+def compareMethods():
+    print "squareRoot(2, 0.01)"
+    squareRootBi(2, 0.01)
+    squareRootNR(2, 0.01)
+    raw_input()
+    print "squareRoot(2, 0.001)"
+    squareRootBi(2, 0.001)
+    squareRootNR(2, 0.001)
+    raw_input()
+    print "squareRoot(2, 0.0001)"
+    squareRootBi(2, 0.0001)
+    squareRootNR(2, 0.0001)
+    raw_input()
+    print "squareRoot(123456789, 0.0001)"
+    squareRootBi(123456789, 0.0001)
+    squareRootNR(123456789, 0.0001)
+    raw_input()
+    print "squareRoot(123456789, 0.000001)"
+    squareRootBi(123456789, 0.000001)
+    squareRootNR(123456789, 0.000001)
+    raw_input()
+    print "squareRoot(2736336100, 0.0001)"
+    squareRootBi(2736336100, 0.0001)
+    squareRootNR(2736336100, 0.0001)
+    raw_input()
+# as the problem gets more complex, the difference between good and bad methods get bigger
+
+# compareMethods()
+
+# Answers can be WRONG: when you get an answer from the computer, ask yourself: why do I believe it
+
+
+### Non-scalar types: tuples, strings -> immutable
+# mutable -> Lists
+
+Techs = ['MIT', 'Cal Tech'] # points to a list (object)
+Ivys = ['Harvard', 'Yale', 'Brown']
+Univs = []
+
+Univs.append(Techs)
+Univs.append(Ivys) # method
+# print Univs
+
+# for e in Univs:
+#     print e
+#     for c in e: print c
+
+# Flattening the list
+Univs = Techs + Ivys  # concatenation
+# print Univs
+
+Ivys.remove('Harvard') # changed the original list
+
+print Univs
