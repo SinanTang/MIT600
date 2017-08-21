@@ -4,7 +4,7 @@ from string import *
 
 #  target strings
 target1 = 'atgacatgcacaagtatgcat'
-target2 = 'atgaatgcatggatgtaaatgcag'
+target2 = 'atgaaggcatggatgtaaatgcag'
 
 
 # key strings
@@ -48,7 +48,7 @@ def countSubStringMatchRecursive(target, key):
 ### Problem 3b: return a tuple of the starting points of matches of the key string in the target string
 
 # 1st solution, doesnt work well
-def subStringMatchExact(target, key):
+def subStringMatchExact0(target, key):
     # matches = ()
     match = find(target, key)
     matches = (match,)
@@ -63,33 +63,43 @@ def subStringMatchExact(target, key):
     return matches
 
 # second solution, works!
-def subStringMatchExact2(target, key):
+def subStringMatchExact(target, key):
     matches = []
-    for i in range(len(target)):
+    for i in range(len(target)): # BETTER: range(0, len(target)-len(key)+1)
+
+   # another (faster) solution ->
+   #  for i in range(0, len(target)-len(key)+1):
+   #      if target[i : i+len(key)] == key:
+   #          matches.append(i)
+
         match = find(target, key, i)
-        # print match, match == -1
-        # try: match > 0   # try/except not working
-        # except: return "No match"
-        # assert match >= 0, "no match"
         if match not in matches and match != -1 :
             matches.append(match)
     return tuple(matches)
 
 # print subStringMatchExact2(target1, key13)
 
+
 def testStringMatch():
     for target in [target1, target2]:
         for key in [key10, key11, key12, key13]:
             print "subStringMatchExact", target, key
-            print subStringMatchExact2(target, key)
+            print subStringMatchExact(target, key)
 
-testStringMatch()
+# testStringMatch()
 
 
 
 ### Problem 3c:
 
 def constrainedMatchPair(firstMatch, secondMatch, length):
+    startingIndexes = []
+    # firstMatch & secondMatch are tuples
+    for n in firstMatch:
+        for k in secondMatch:
+            if n + length + 1 == k:
+                startingIndexes.append(n)
+    return tuple(startingIndexes)
 
 
 ## the following procedure you will use in Problem 3
@@ -105,13 +115,26 @@ def subStringMatchOneSub(key, target):
         print('breaking key', key, 'into', key1, key2)
         # match1 and match2 are tuples of locations of start of matches
         # for each substring in target
-        match1 = subStringMatchExact2(target, key1)
-        match2 = subStringMatchExact2(target, key2)
+        match1 = subStringMatchExact(target, key1)
+        match2 = subStringMatchExact(target, key2)
         # when we get here, we have two tuples of start points
         # need to filter pairs to decide which are correct
         filtered = constrainedMatchPair(match1, match2, len(key1))
         allAnswers = allAnswers + filtered
-        print('match1', match1)
-        print('match2', match2)
+        # print('match1', match1)
+        # print('match2', match2)
         print('possible matches for', key1, key2, 'start at', filtered)
-    return allAnswers
+    allAnswers = reduce(lambda a,b: a if b in a else a+(b,), allAnswers, ())
+    return allAnswers # this returns every solutions with many duplicates, so I added the lambda function above
+
+# print subStringMatchOneSub(key12, target1)
+
+
+### Problem 3d: return a tuple that has all the starting points of matches of the key to the target,
+    # such that exactly one element of the key is incorrectly matched to the target
+
+def subStringMatchExactlyOneSub(target, key):
+    # return indexes found in subStringMatchOneSub(), but not in subStringMatchExact()
+    return tuple([item for item in subStringMatchOneSub(key, target) if item not in subStringMatchExact(target, key)])
+
+print subStringMatchExactlyOneSub(target1, key11), "\n", subStringMatchExactlyOneSub(target2, key11)
