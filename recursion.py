@@ -172,6 +172,7 @@ def factorial2(n):
 # print(factorial2(-4))
 # print(factorial2(2.5))
 
+### Think Python Ch. 6 exercises
 # Exercise 6.1 draw stack diagram
 def b(z):
     prod = a(z, z)

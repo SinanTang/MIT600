@@ -204,6 +204,8 @@ with open('words.txt') as f:
     wordlist = []
     for line in f:
         wordlist.append(line.strip())
+    # alternative testing, use smaller input to start with
+    # wordlist = [str(next(f)).strip() for x in range(10)]  # xrange() in python 2, range() in python 3
 
 # print in_bisect(wordlist, ReverseWord('acajou'))
 
@@ -264,3 +266,5 @@ print 'Num. of reverse pair found:', len(reverseList2), '\n', 'And their positio
 
 ### Exercise 10.12: find interlock pairs in the word list
 # s h o e + c o l d -> schooled
+
+
