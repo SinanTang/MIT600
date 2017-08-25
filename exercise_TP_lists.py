@@ -249,7 +249,7 @@ for i in range(len(wordlist)):
         reverseList.append(reversePair)
     else: pass
 
-print 'Num. of reverse pair found:', len(reverseList), '\n', 'And their positions in the word list:', reverseList
+# print 'Num. of reverse pair found:', len(reverseList), '\n', 'And their positions in the word list:', reverseList
 
 ## for testing...
 reverseList2 = []
@@ -260,11 +260,25 @@ for i in range(len(wordlist)):
         reverseList2.append(reversePair)
     else: pass
 
-print 'Num. of reverse pair found:', len(reverseList2), '\n', 'And their positions in the word list:', reverseList2
+# print 'Num. of reverse pair found:', len(reverseList2), '\n', 'And their positions in the word list:', reverseList2
 
 
 
 ### Exercise 10.12: find interlock pairs in the word list
 # s h o e + c o l d -> schooled
+## moved to TP_ch10_interlock.py
+
+def interlock_output(w1, w2):
+    """finds all the possible interlock output of a word pair
+    w1, w2 : string
+    len(w2) == len(w1)
+    """
+    output = ''
+    for i in range(len(w1)):
+        output = output + w1[i] + w2[i]
+    return output
+
+# print(interlock_output('shoe', 'cold'))
+
 
 

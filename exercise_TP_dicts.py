@@ -276,4 +276,4 @@ def rotate_pairs(word, word_dict):
 #     print(output)
 
 
-
+### Exercise 11.6: solving the homophone problem
