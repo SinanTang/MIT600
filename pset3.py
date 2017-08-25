@@ -16,7 +16,9 @@ key14 = 'ab'
 
 # print find(target1, key11), find(target1, key11, 6), find(target1, key11, 5)
 
+
 ### Problem 3a: 2 functions to count the number of instances of a string in the target
+
 def countSubStringMatch(target, key):
     counter = []
     for i in range(len(target)):
@@ -44,6 +46,7 @@ def countSubStringMatchRecursive(target, key):
     # '1+' is essential here, so every recursive cycle can add 1 to the result
 
 # print countSubStringMatchRecursive(target1, key14), countSubStringMatchRecursive(target1, key11)
+
 
 ### Problem 3b: return a tuple of the starting points of matches of the key string in the target string
 

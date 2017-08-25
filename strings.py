@@ -115,7 +115,7 @@
             
 # in_both("sinantang", "stephanschur") #will print common letters which appear multiple times in w1
 
-#Exercises    
+#Exercises Think Python Ch 8
 #8.2
 # a = "banana"
 # print a.count('a')
