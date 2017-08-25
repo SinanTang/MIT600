@@ -277,3 +277,4 @@ def rotate_pairs(word, word_dict):
 
 
 ### Exercise 11.6: solving the homophone problem
+# moved to TP_ch11_homophone.py

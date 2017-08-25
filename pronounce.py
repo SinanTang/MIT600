@@ -12,7 +12,7 @@ License: http://creativecommons.org/licenses/by/4.0/
 from __future__ import print_function, division
 
 
-def read_dictionary(filename='c06d'):
+def read_dictionary(filename):
     """Reads from a file and builds a dictionary that maps from
     each word to a string that describes its primary pronunciation.
 
@@ -28,17 +28,22 @@ def read_dictionary(filename='c06d'):
     for line in fin:
 
         # skip over the comments
-        if line[0] == '#': continue
+        if line[0] == ';': continue
 
         t = line.split()
         word = t[0].lower()
         pron = ' '.join(t[1:])
         d[word] = pron
 
+    fin.close()
     return d
 
 
 if __name__ == '__main__':
-    d = read_dictionary()
-    for k, v in d.items():
-        print(k, v)
+    # write to a file instead of printing everything out
+    with open('/Users/sinansmac/Documents/MIT600/pron_dict.txt', 'w') as f:
+
+        d = read_dictionary("/Users/sinansmac/Documents/MIT600/c07b.txt")
+        for k, v in d.items():
+            f.write(str(k)+str(v)+'\n')
+            # print(k, v)
