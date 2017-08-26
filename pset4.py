@@ -15,7 +15,15 @@ def nestEggFixed(salary, save, growthRate, years):
     - return: a list whose values are the size of your retirement account at
       the end of each year.
     """
-    # TODO: Your code here.
+    retireFund_year = []
+    fund = 0
+    for i in range(0, years):
+        fund = fund * (1 + 0.01 * growthRate)
+        fund = fund + salary * save * 0.01
+        retireFund_year.append(fund)
+
+    return retireFund_year
+
 
 def testNestEggFixed():
     salary     = 10000
@@ -29,6 +37,10 @@ def testNestEggFixed():
 
     # TODO: Add more test cases here.
 
+# testNestEggFixed()
+
+
+
 #
 # Problem 2
 #
@@ -39,10 +51,25 @@ def nestEggVariable(salary, save, growthRates):
     - salary: the amount of money you make each year.
     - save: the percent of your salary to save in the investment account each
       year (an integer between 0 and 100).
-    - growthRate: a list of the annual percent increases in your investment
+    - growthRates: a list of the annual percent increases in your investment
       account (integers between 0 and 100).
     - return: a list of your retirement account value at the end of each year.
     """
+
+    ## this doesnt work b/c it's calculating one growth rate for the given length of years
+    # years = len(growthRates)
+    # for rate in growthRates:
+    #     print(nestEggFixed(salary, save, rate, years))
+
+    years = len(growthRates)
+    record = []
+    fund = 0
+    for i in range(0, years):
+        fund = fund * (1 + 0.01 * growthRates[i])
+        fund = fund + salary * save * 0.01
+        record.append(fund)
+    return record
+
 
 def testNestEggVariable():
     salary      = 10000
@@ -54,6 +81,10 @@ def testNestEggVariable():
     # [1000.0, 2040.0, 3142.0, 4142.0, 5266.2600000000002]
 
     # TODO: Add more test cases here.
+
+# testNestEggVariable()
+
+
 
 #
 # Problem 3
@@ -68,7 +99,13 @@ def postRetirement(savings, growthRates, expenses):
       retirement.
     - return: a list of your retirement account value at the end of each year.
     """
-    # TODO: Your code here.
+    record = []
+    for i in range(0, len(growthRates)):
+        savings = savings * (1 + 0.01 * growthRates[i]) - expenses
+        record.append(savings)
+
+    return record
+
 
 def testPostRetirement():
     savings     = 100000
@@ -81,6 +118,10 @@ def testPostRetirement():
     # -4799.9999999999854, -34847.999999999985]
 
     # TODO: Add more test cases here.
+
+# testPostRetirement()
+
+
 
 #
 # Problem 4
@@ -99,7 +140,27 @@ def findMaxExpenses(salary, save, preRetireGrowthRates, postRetireGrowthRates,
     - epsilon: an upper bound on the absolute value of the amount remaining in
       the investment fund at the end of retirement.
     """
-    # TODO: Your code here.
+    # 1. calculate total savings
+    savings = nestEggVariable(salary, save, preRetireGrowthRates)[-1]
+
+    # 2. binary search for ideal expenses
+    low = 0
+    high = savings + epsilon
+    guess = (low + high) / 2.0
+    count = 1
+    while abs(high - low) > epsilon and count < 100:
+        if postRetirement(savings, postRetireGrowthRates, guess)[-1] < - epsilon:
+            high = guess
+        else: low = guess
+
+        guess = (low + high) / 2.0
+        count += 1
+
+        print(count, guess)
+
+    assert count <= 100, "Iteration count exceeded"
+    return guess
+
 
 def testFindMaxExpenses():
     salary                = 10000
@@ -114,3 +175,5 @@ def testFindMaxExpenses():
     # 1229.95548986
 
     # TODO: Add more test cases here.
+
+testFindMaxExpenses()
