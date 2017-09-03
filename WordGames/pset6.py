@@ -5,10 +5,12 @@
 
 import random
 import string
+import time
+import operator
 
 VOWELS = 'aeiou'
 CONSONANTS = 'bcdfghjklmnpqrstvwxyz'
-HAND_SIZE = 7
+HAND_SIZE = 10
 
 SCRABBLE_LETTER_VALUES = {
     'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1, 'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1,
@@ -31,7 +33,7 @@ def load_words():
     """
     print("Loading word list from file...")
     # inFile: file
-    inFile = open(WORDLIST_FILENAME, 'r', 0)
+    inFile = open(WORDLIST_FILENAME, 'r')
     # wordlist: list of strings
     wordlist = []
     for line in inFile:
@@ -135,6 +137,8 @@ def deal_hand(n):
     return hand
 
 
+
+
 #
 # Problem #2: Update a hand by removing letters
 #
@@ -180,6 +184,86 @@ def is_valid_word(word, hand, word_list):
     return word in word_list
 
 
+
+#
+# Problem #6c: Computer Player
+#
+def get_words_to_points(word_list):
+    """
+    Return a dict that maps every word in word_list to its point value.
+    """
+    points_dict = {}
+    for word in word_list:
+        points_dict[word] = get_word_score(word, HAND_SIZE)
+    return points_dict
+
+
+word_list = load_words()
+points_dict = get_words_to_points(word_list)
+
+
+def pick_best_word(hand, points_dict):
+    """
+    Return the highest scoring word from points_dict that can be made with the given hand.
+    Return '.' if no words can be made with the given hand.
+    """
+    points = {}
+
+    for word in points_dict:
+        if_in_hand = True
+        # print("word under review", word)
+        freq = get_frequency_dict(word)
+        for letter in freq:
+            # print(letter, freq[letter])
+            if freq[letter] > hand.get(letter, 0):
+                if_in_hand = False
+                # print("if_in_hand", if_in_hand)
+        if if_in_hand:
+            # print(letter, word)
+            points[word] = points_dict[word]
+
+    # print(points, len(points))
+    if len(points) == 0: return "."
+    return max(points.items(), key = operator.itemgetter(1))[0]
+
+# print(pick_best_word({'a':2, 'z':3, 'p':1, 'u':1, 't':1}, points_dict))
+
+
+def get_time_limit(points_dict, k):
+    """
+    Return the time limit for the computer player as a function of the
+    multiplier k.
+    points_dict should be the same dictionary that is created by
+    get_words_to_points.
+    """
+    start_time = time.time()
+    # Do some computation. The only purpose of the computation is so we can
+    # figure out how long your computer takes to perform a known task.
+    for word in points_dict:
+        get_frequency_dict(word)
+        get_word_score(word, HAND_SIZE)
+    end_time = time.time()
+    return (end_time - start_time) * k
+
+time_limit = get_time_limit(points_dict, 5)
+# print(time_limit)
+
+
+
+#
+# Problem #6d: Even Faster Computer Player
+#
+def get_word_rearrangements():
+    d = {}
+
+
+
+rearrange_dict = get_word_rearrangements()
+
+def pick_best_word_faster(hand, rearrange_dict):
+
+
+
 #
 # Problem #4: Playing a hand
 #
@@ -211,22 +295,55 @@ def play_hand(hand, word_list):
     """
     total = 0
     initial_handlen = sum(hand.values())
+    # clock = float(input("Enter time limit, in seconds, for players: ")) # human player
+    clock = time_limit # for the computer player
+    period = []
+
     while sum(hand.values()) > 0:
-        print('Current Hand:', end=' ')
+        print('\n'+'Current Hand:', end=' ')
         display_hand(hand)
-        userWord = input('Enter word, or a . to indicate that you are finished: ')
+
+        # record starting time.
+        start_time = time.time()
+
+        # human player
+        # userWord = input('Enter word, or a . to indicate that you are finished: ')
+        # computer player
+        userWord = pick_best_word(hand, points_dict)
+
+        end_time = time.time()
+        play_time = end_time - start_time
+        period.append(play_time)
+
         if userWord == '.':
             break
+
+        elif sum(period) >= clock:
+            print("Total time exceeds %d seconds. You scored %.2f points." % (clock, total))
+            return
+
         else:
-            isValid = is_valid_word(userWord, hand, word_list)
+            isValid = is_valid_word(userWord, hand, points_dict)
             if not isValid:
+                # print("invalid time",period, sum(period))
                 print('Invalid word, please try again.')
             else:
-                points = get_word_score(userWord, initial_handlen)
+                # print("valid input", period, sum(period))
+                # if reaction time is less than 1 sec, assign 1 sec to total_time, so no point is deducted
+                if play_time < 1: play_time = 1.0
+
+                remaining = clock - sum(period)
+
+                print("It took %d seconds to provide an answer." % play_time)
+                print("You have %d seconds remaining." % remaining)
+
+                points = round((get_word_score(userWord, initial_handlen)) / play_time, 2)
                 total += points
-                print('%s earned %d points. Total: %d points' % (userWord, points, total))
+
+                print('%s earned %.2d points. Total: %.2d points' % (userWord, points, total))
                 hand = update_hand(hand, userWord)
-    print('Total score: %d points.' % total)
+    print('Total score: %.2d points.' % total)
+
 
 
 #

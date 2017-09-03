@@ -86,7 +86,7 @@ def get_word_score(word, n):
     if len(word) == n: score = score + 50
 
     for letter in word:
-        score = score + SCRABBLE_LETTER_VALUES[letter]
+        score += SCRABBLE_LETTER_VALUES[letter.lower()]
         # print(score) # for testing
     return score
 
@@ -183,8 +183,12 @@ def update_hand(hand, word):
             pass
         else:
             result[letter] = hand[letter] - wd[letter]
-
     return result
+
+    ## much more concise version:
+    # for char in hand:
+    # 	result[char] = hand[char] - freq.get(char, 0)
+    # return result
 
 
 # print(update_hand({'a': 1, 'q': 1, 'l': 2, 'm': 1, 'u': 1, 'i': 1}, "quail"))
@@ -257,6 +261,10 @@ def play_hand(hand, word_list):
     """
     # initialise total score, prepare the loop
     total = 0
+    # better method to calculate the total number of letters in a hand
+      # should put this outside the loop, b/c rule says 50 additonal points
+      # only when all letters are used on the first go
+    initial_handlen = sun(hand.values())
 
     while len(hand) > 0:
 
@@ -273,11 +281,11 @@ def play_hand(hand, word_list):
             continue
 
         # scoring
-        n = 0
-        for i in hand:
-            n += hand[i]
-        score = get_word_score(word, n)
-        total = total + score  # total += score
+        # n = 0
+        # for i in hand:
+        #     n += hand[i]
+        score = get_word_score(word, initial_handlen)
+        total += score  # total += score
         print(word, "earned", score, "points. Total:", total, "points")
 
         hand = update_hand(hand, word)
