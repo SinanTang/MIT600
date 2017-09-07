@@ -7,6 +7,7 @@ import random
 import string
 import time
 import operator
+from itertools import combinations
 
 VOWELS = 'aeiou'
 CONSONANTS = 'bcdfghjklmnpqrstvwxyz'
@@ -198,9 +199,6 @@ def get_words_to_points(word_list):
     return points_dict
 
 
-word_list = load_words()
-points_dict = get_words_to_points(word_list)
-
 
 def pick_best_word(hand, points_dict):
     """
@@ -226,7 +224,7 @@ def pick_best_word(hand, points_dict):
     if len(points) == 0: return "."
     return max(points.items(), key = operator.itemgetter(1))[0]
 
-# print(pick_best_word({'a':2, 'z':3, 'p':1, 'u':1, 't':1}, points_dict))
+# print(pick_best_word({'a':1, 'x':2, 'l':3, 'e':1}, points_dict))
 
 
 def get_time_limit(points_dict, k):
@@ -245,7 +243,6 @@ def get_time_limit(points_dict, k):
     end_time = time.time()
     return (end_time - start_time) * k
 
-time_limit = get_time_limit(points_dict, 5)
 # print(time_limit)
 
 
@@ -253,14 +250,65 @@ time_limit = get_time_limit(points_dict, 5)
 #
 # Problem #6d: Even Faster Computer Player
 #
+
+def hand_string(hand):
+    """
+    :param hand: hand in dictionary
+    :return: a sorted string storing all the letters in the hand
+    """
+    str = ''
+    for letter in hand:
+        for i in range(1, hand[letter]+1):
+           str += letter
+    str = ''.join(sorted(str))
+    return str
+
+
 def get_word_rearrangements():
+    """
+    read the word list and transform each word into a string of sorted letters.
+    :return: a dictionary with value being a valid word,
+          and key being the letters of the word in sorted manner
+    """
     d = {}
+    for w in word_list:
+        w_rearrange = ''.join(sorted(list(w)))
+        d[w_rearrange] = w
+    return d
 
 
-
-rearrange_dict = get_word_rearrangements()
 
 def pick_best_word_faster(hand, rearrange_dict):
+    """
+    first finds all the subsets as string from given hand,
+    returns the word with best score
+    :param hand: hand in dictionary
+    :param rearrange_dict: a dictionary based on word list, stores sorted letters as string (key) of a word (value)
+    :return: a valid word with best score from the given hand
+    """
+    combs = []
+    handString = hand_string(hand)
+    max_len = len(handString)
+
+    for x in reversed(range(1, max_len+1)):
+        for y in combinations(handString, x):
+            sub = ''.join(y)
+            if sub not in combs:
+                combs.append(sub)
+
+    best_score = 0
+    best_word = ''
+    for comb in combs:
+        if comb in rearrange_dict:
+            word = rearrange_dict[comb]
+            points = points_dict[word]
+            if points > best_score:
+                best_score = points
+                best_word = word
+
+    return best_word
+
+# print(pick_best_word_faster({'a':1, 'x':2, 'l':3, 'e':1}, rearrange_dict))
 
 
 
@@ -308,8 +356,9 @@ def play_hand(hand, word_list):
 
         # human player
         # userWord = input('Enter word, or a . to indicate that you are finished: ')
-        # computer player
-        userWord = pick_best_word(hand, points_dict)
+        # computer player 1/2
+        # userWord = pick_best_word(hand, points_dict)
+        userWord = pick_best_word_faster(hand, rearrange_dict)
 
         end_time = time.time()
         play_time = end_time - start_time
@@ -329,15 +378,19 @@ def play_hand(hand, word_list):
                 print('Invalid word, please try again.')
             else:
                 # print("valid input", period, sum(period))
-                # if reaction time is less than 1 sec, assign 1 sec to total_time, so no point is deducted
+                # for human player: if reaction time is less than 1 sec, assign 1 sec to total_time, so no point is deducted
                 if play_time < 1: play_time = 1.0
+                # for computer player: score penalised for 1/1000 points for 1/100 secs
+                penalise = float(play_time * 100) / 1000
 
                 remaining = clock - sum(period)
 
                 print("It took %d seconds to provide an answer." % play_time)
                 print("You have %d seconds remaining." % remaining)
 
-                points = round((get_word_score(userWord, initial_handlen)) / play_time, 2)
+                # points = round((get_word_score(userWord, initial_handlen)) / play_time, 2)
+                points = round((get_word_score(userWord, initial_handlen)) - penalise, 2)
+
                 total += points
 
                 print('%s earned %.2d points. Total: %.2d points' % (userWord, points, total))
@@ -387,4 +440,19 @@ def play_game(word_list):
 #
 if __name__ == '__main__':
     word_list = load_words()
+    points_dict = get_words_to_points(word_list)
+    rearrange_dict = get_word_rearrangements()
+    time_limit = get_time_limit(points_dict, 1)
     play_game(word_list)
+
+
+
+#
+# Problem #6e: algorithm analysis
+#
+
+# the size of word_list and the number of letters in a hand
+
+# pick_best_word(): O(n)
+
+# pick_best_word_faster(): O(log)
