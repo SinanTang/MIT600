@@ -11,7 +11,7 @@ from itertools import combinations
 
 VOWELS = 'aeiou'
 CONSONANTS = 'bcdfghjklmnpqrstvwxyz'
-HAND_SIZE = 10
+HAND_SIZE = 7
 
 SCRABBLE_LETTER_VALUES = {
     'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1, 'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1,
@@ -182,7 +182,7 @@ def is_valid_word(word, hand, word_list):
     for letter in word:
         if freq[letter] > hand.get(letter, 0):
             return False
-    return word in word_list
+    return word in word_list  # O(n)
 
 
 
@@ -200,7 +200,7 @@ def get_words_to_points(word_list):
 
 
 
-def pick_best_word(hand, points_dict):
+def pick_best_word0(hand, points_dict):
     """
     Return the highest scoring word from points_dict that can be made with the given hand.
     Return '.' if no words can be made with the given hand.
@@ -224,7 +224,38 @@ def pick_best_word(hand, points_dict):
     if len(points) == 0: return "."
     return max(points.items(), key = operator.itemgetter(1))[0]
 
+# print(pick_best_word0({'a':1, 'x':2, 'l':3, 'e':1}, points_dict))
+
+def pick_best_word(hand, points_dict):
+    """
+    second implementation of func pick_best_word,
+    improvement: doesnt rely on library, not temporary storage needed for another dict, make use of using func is_valid_word
+    :param hand: dictionary of letter-frequency pairs
+    :param points_dict: dictionary of word-points pairs
+    :return: the highest scoring word from points_dict that can be made with the given hand;
+            returns '.' if no words can be made with the given hand.
+    """
+    best_score = 0
+    best_word = ''
+    for word in points_dict:
+        if is_valid_word(word, hand, word_list) and points_dict[word] > best_score:
+            best_score = points_dict[word]
+            best_word = word
+
+        # if_in_hand = True
+        # freq = get_frequency_dict(word)
+        # for letter in freq:
+        #     if freq[letter] > hand.get(letter, 0):
+        #         if_in_hand = False
+        # if if_in_hand and points_dict[word] > best_score:
+        #     best_score = points_dict[word]
+        #     best_word = word
+
+    if len(best_word) > 0: return best_word
+    else: return "."
+
 # print(pick_best_word({'a':1, 'x':2, 'l':3, 'e':1}, points_dict))
+
 
 
 def get_time_limit(points_dict, k):
@@ -305,8 +336,8 @@ def pick_best_word_faster(hand, rearrange_dict):
             if points > best_score:
                 best_score = points
                 best_word = word
-
-    return best_word
+    if len(best_word) > 0: return best_word
+    else: return "."
 
 # print(pick_best_word_faster({'a':1, 'x':2, 'l':3, 'e':1}, rearrange_dict))
 
@@ -441,6 +472,7 @@ def play_game(word_list):
 if __name__ == '__main__':
     word_list = load_words()
     points_dict = get_words_to_points(word_list)
+    # print(pick_best_word({'a': 1, 'b': 2, 'q': 3, 't': 1}, points_dict))
     rearrange_dict = get_word_rearrangements()
     time_limit = get_time_limit(points_dict, 1)
     play_game(word_list)
@@ -453,6 +485,8 @@ if __name__ == '__main__':
 
 # the size of word_list and the number of letters in a hand
 
-# pick_best_word(): O(n)
+# pick_best_word(): needs to loop through points_dict, and refered func is_valid_word needs to search in list. Complexity should be O(n).
 
-# pick_best_word_faster(): O(log)
+
+# pick_best_word_faster(): rearrange_dict reduces the size of the dictionary compared to original entry number in word_list.
+# O(log)? not very sure. iterating through dictionary should be linear too..
