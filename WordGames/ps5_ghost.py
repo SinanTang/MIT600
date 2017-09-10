@@ -142,4 +142,4 @@ def ghost():
             print("Player {} loses because no word begins with {}!".format(n, wordfrag))
             return "Player {} wins!".format(n2)
 
-# print(ghost())
+print(ghost())
