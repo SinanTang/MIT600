@@ -70,7 +70,7 @@ def testSelSort():
     input('run selective test 4')
     selSort(test4)
 
-testSelSort()
+# testSelSort()
 
 # loop invariant (a property true of the structure every time through the loop)
   # list is split into a prefix and a suffix, prefix is sorted, suffix not
@@ -131,3 +131,27 @@ def testBubbleSort():
 # O(n**2)
 # better than selection sort and bubble sort
 # one of the fastest algorithms for sorting very small arrays
+
+def insertSort(L):
+    # pre = [L[0],]
+    # suf = L[1:]
+    # for i in suf:
+    #     for j in reversed(range(len(pre))):
+    #         if suf[i] < pre[j]:
+    #             temp = pre[j]
+    #             pre.remove(j)
+    #             pre.append(suf[i])
+    #             pre.append(temp)
+    #         else:
+    for i in range(1, len(L)):
+        val = L[i]
+        index = i
+
+        while index > 0 and L[index - 1] > val:
+            L[index] = L[index-1]
+            index -= 1
+        L[index] = val
+
+    return L
+
+print(insertSort([1,6,3,4,5,2]))
