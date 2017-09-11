@@ -127,3 +127,32 @@ def silly():
 
 
 ...and **PATIENCE**
+
+
+
+More from Lec12...
+
+Where / How to look for **bugs**:
+    1. reversed order of arguments (in function call)
+    2. spelling
+    3. initialisation
+    4. object vs value quality, e.g. '=='
+    5. aliasing (2 different ways to refer to the same object/value)
+      - deep vs shallow copys, e.g. copying lists of lists (mutable)
+    6. side effects, e.g. parameters changed during function call
+    
+    7. Keep a personal list of bugs you make...
+
+    8. keep record of what you tried
+    9. reconsidering your assumptions
+    
+    10. when debugging others code: debug code, not comments
+    11. seek help - explain the program
+    12. walk away
+
+when find the bug, what to do:
+    1. Haste makes waste..
+    2. code should not always grow
+    3. tidy up
+    4. make sure that you can revert - save old versions
+    
