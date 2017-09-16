@@ -61,7 +61,7 @@ numCalls = 0
 n = 10
 # print('fib of', n, '=', fib(n), '. numCalls =', numCalls)
 
-# exponential growth...
+# exponential growth... rather complex to see exactly how
 
 def fib1(n):
     global memo
