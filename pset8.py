@@ -4,8 +4,8 @@
 
 import time
 
-# SUBJECT_FILENAME = "subjects.txt"
-SUBJECT_FILENAME = "subjects_small.txt"
+SUBJECT_FILENAME = "subjects.txt"
+# SUBJECT_FILENAME = "subjects_small.txt"
 VALUE, WORK = 0, 1
 
 #
@@ -42,8 +42,8 @@ def printSubjects(subjects):
     if len(subjects) == 0:
         return 'Empty SubjectList'
     res = 'Course\tValue\tWork\n======\t====\t=====\n'
-    subNames = subjects.keys()
-    # subNames.sort()
+    subNames = list(subjects.keys())
+    subNames.sort()
     for s in subNames:
         val = subjects[s][VALUE]
         work = subjects[s][WORK]
@@ -155,7 +155,7 @@ def greedyTest():
     print(greedyAdvisor(subjects, 25, cmpRatio))
 
 # greedyTest()
-selected = greedyAdvisor(subjects, 15, cmpValue)
+# selected = greedyAdvisor(subjects, 15, cmpValue)
 # printSubjects(selected)
 
 
@@ -174,8 +174,8 @@ def bruteForceAdvisor(subjects, maxWork):
     maxWork: int >= 0
     returns: dictionary mapping subject name to (value, work)
     """
-    nameList = subjects.keys()
-    tupleList = subjects.values()
+    nameList = list(subjects.keys())
+    tupleList = list(subjects.values())
     bestSubset, bestSubsetValue = \
             bruteForceAdvisorHelper(tupleList, maxWork, 0, None, None, [], 0, 0)
     outputSubjects = {}
@@ -186,6 +186,18 @@ def bruteForceAdvisor(subjects, maxWork):
 
 def bruteForceAdvisorHelper(subjects, maxWork, i, bestSubset, bestSubsetValue,
                             subset, subsetValue, subsetWork):
+    """
+
+    :param subjects:
+    :param maxWork:
+    :param i: index
+    :param bestSubset: list of the index of selected subject
+    :param bestSubsetValue:
+    :param subset: [] or [n], n is an instance of i, not necessarily the same as i
+    :param subsetValue:
+    :param subsetWork:
+    :return:
+    """
     # Hit the end of the list.
     if i >= len(subjects):
         if bestSubset == None or subsetValue > bestSubsetValue:
@@ -199,14 +211,18 @@ def bruteForceAdvisorHelper(subjects, maxWork, i, bestSubset, bestSubsetValue,
         # Try including subjects[i] in the current working subset.
         if subsetWork + s[WORK] <= maxWork:
             subset.append(i)
+            # print('after appending:', i, subset, bestSubset)
             bestSubset, bestSubsetValue = bruteForceAdvisorHelper(subjects,
                     maxWork, i+1, bestSubset, bestSubsetValue, subset,
                     subsetValue + s[VALUE], subsetWork + s[WORK])
             subset.pop()
+            # print('after popping:', i, subset, bestSubset)
         bestSubset, bestSubsetValue = bruteForceAdvisorHelper(subjects,
                 maxWork, i+1, bestSubset, bestSubsetValue, subset,
                 subsetValue, subsetWork)
         return bestSubset, bestSubsetValue
+
+# printSubjects(bruteForceAdvisor(subjects, 25))
 
 
 def bruteForceTime():
@@ -214,19 +230,76 @@ def bruteForceTime():
     Runs tests on bruteForceAdvisor and measures the time required to compute
     an answer.
     """
-    # TODO...
+    def bruteForceTest(n):
+        start = time.time()
+        bruteForceAdvisor(subjects, n)
+        end = time.time()
+        compute_time = round(float(end - start), 3)
+        print('Brute Force Algorithm: maxWork = {}, takes {}s to compute.'.format(n, compute_time))
+
+    for i in range(5, 10):
+        bruteForceTest(i)
+
+    # bruteForceTest(5)  # 0.74379s
+    # bruteForceTest(6)  # 2.44688s
+    # bruteForceTest(7)  # 7.68925s
+    # bruteForceTest(8)  # 22.42151s
+    # bruteForceTest(9)  # 62.11813s
+
+# bruteForceTime()
 
 
 # Problem 3 Observations
 # ======================
-#
-# TODO: write here your observations regarding bruteForceTime's performance
+# your observations regarding bruteForceTime's performance
+
+# Computation time grows exponentially. When maxWork equals 9, it already takes more than 1 minute to compute the optimal solution.
+# recursive strategy
 
 
 
 #
 # Problem 4: Subject Selection By Dynamic Programming
 #
+
+def dp_decision_tree(w, v, i, aW, m):
+    """
+    Creates a course schedule that is optimized the maximum value.
+    :param aW: work hour available
+    :param m: memo = {(i,aW):(value,recSubjectNo), }
+    """
+    try: return m[(i, aW)]
+    except KeyError:
+        #  Leaf/Bottom of the tree case decision
+        if i == 0:
+            if w[i] < aW:
+                m[(i, aW)] = v[i], [i]
+                return v[i], [i]
+            else:
+                m[(i, aW)] = 0, []
+                return 0, []
+
+    # Calculate with and without i branches
+    without_i, course_list = dp_decision_tree(w, v, i-1, aW, m)
+    if w[i] > aW:
+        m[(i, aW)] = without_i, course_list
+        return without_i, course_list
+    else:
+        with_i, course_list_temp = dp_decision_tree(w, v, i-1, aW-w[i], m)
+        with_i += v[i]
+
+    # Take the branch with the higher value
+    if with_i > without_i:
+        i_value = with_i
+        course_list = [i] + course_list_temp
+    else:
+        i_value = without_i
+
+    # Add this value calculation to memo
+    m[(i, aW)] = i_value, course_list
+    return i_value, course_list
+
+
 def dpAdvisor(subjects, maxWork):
     """
     Returns a dictionary mapping subject name to (value, work) that contains a
@@ -236,19 +309,77 @@ def dpAdvisor(subjects, maxWork):
     maxWork: int >= 0
     returns: dictionary mapping subject name to (value, work)
     """
-    # TODO...
+    memo = {}
+    course_list = list(subjects.keys())
+    v_w_list = list(subjects.values())
+    value_list = []
+    work_list = []
+    for i in v_w_list:
+        value_list.append(i[0])
+        work_list.append(i[1])
+
+    max_val, subject_id_list = dp_decision_tree(work_list, value_list, len(course_list)-1, maxWork, memo)
+
+    outputSubjects = {}
+    for i in subject_id_list:
+        outputSubjects[course_list[i]] = v_w_list[i]
+    return outputSubjects
+
+
+# printSubjects(dpAdvisor(subjects, 25))
+# printSubjects(bruteForceAdvisor(subjects, 25))
+
+
+# not successful attempt
+def dpAdvisorHelper(subjects, maxWork, i, bestSubset, bestSubsetValue,
+                            subset, subsetValue, subsetWork, memo):
+    # memo = {} {(i, subsetWork): subsetValue}
+    try: return memo[(i, subsetWork)] #
+    except KeyError:
+        if i >= len(subjects):
+            if bestSubset == None or subsetValue > bestSubsetValue:
+                memo[(i, subsetWork)] = subsetValue, []
+                # Found a new best.
+                return subset[:], subsetValue
+            else:
+                memo[(i, subsetWork)] = bestSubsetValue, [] # this value?
+                return bestSubset, bestSubsetValue
+        else:
+            s = subjects[i]
+            # Try including subjects[i] in the current working subset.
+            if subsetWork + s[WORK] <= maxWork:
+                memo[(i, subsetWork+s[WORK])] = subsetValue + s[VALUE]
+                subset.append(i)
+                bestSubset, bestSubsetValue = dpAdvisorHelper(subjects, maxWork, i + 1, bestSubset, bestSubsetValue, subset, subsetValue + s[VALUE], subsetWork + s[WORK], memo)
+                subset.pop()
+            bestSubset, bestSubsetValue = dpAdvisorHelper(subjects, maxWork, i + 1, bestSubset, bestSubsetValue, subset, subsetValue, subsetWork, memo)
+            memo[(i, subsetWork)] = subsetValue
+            return bestSubset, bestSubsetValue
+
+# print(dpAdvisor(subjects, 15))
 
 
 
 #
 # Problem 5: Performance Comparison
 #
+
 def dpTime():
     """
     Runs tests on dpAdvisor and measures the time required to compute an
     answer.
     """
-    # TODO...
+    def dpTest(n):
+        start = time.time()
+        dpAdvisor(subjects, n)
+        end = time.time()
+        compute_time = round(float(end - start), 3)
+        print('Dynamic Programming Algorithm: maxWork = {}, takes {}s to compute.'.format(n, compute_time))
+
+    for i in range(5, 26):
+        dpTest(i)
+
+dpTime()
 
 
 
@@ -257,3 +388,11 @@ def dpTime():
 #
 # TODO: write here your observations regarding dpAdvisor's performance and
 # how its performance compares to that of bruteForceAdvisor.
+
+# Dynamic programmign algorithm performance:
+  # maxWork = 5, 0.002s
+  # maxWork = 25, 0.01s
+# near O(N) linear performance
+
+# Compared to the exponential complexity of brute force algorithm, dynamic programming is much more efficient.
+# With dpAdvisor(), it's not likely that the program would fail when size of course catalogue or maxWork increases.
