@@ -103,3 +103,10 @@ print('max Val =', res, 'number of calls =', numCalls)
   ## as compared to the original solution
 ## magic of *dynamic programming*
 
+
+## Lec14, more on Dynamic Programming (DP)
+
+# 1. we trade time for space in DP
+# 2. don't be intimidated by exponential problem
+# 3. DP is broadly useful - when you see recursive structure, overlapping subproblem
+# 4. the notion of problem reduction: can I transform this to a known problem?
