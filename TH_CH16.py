@@ -219,5 +219,5 @@ def n_times_day(y1,m1,d1, y2,m2,d2, n):
             return date.fromordinal(i)
         i += 1
 
-# can be very slow... may exist a better solution ->
-print(n_times_day(2000,1,1, 2000,2,1, 3))
+# can be very slow for n>2... may exist a better solution ->
+print(n_times_day(2000,1,1, 2000,2,1, 2))

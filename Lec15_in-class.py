@@ -80,7 +80,7 @@ class cPoint:
         self.angle = math.atan2(self.y, self.x)
     def cartesian(self):
         # define internal method - can access values of the specific instance
-        # p.cartesian - is a kind of accessor
+        # p.cartesian() - is a kind of accessor
 # ? Data Hiding: one can only access instance values through defined methods
     # Python doesn't do it!
         return (self.x, self.y)
