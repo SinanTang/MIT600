@@ -36,10 +36,17 @@ class Time:
         seconds = self.time_to_int() + other.time_to_int()
         return int_to_time(seconds)
 
+    def __lt__(self, other):
+        t1 = self.hour, self.minute, self.second
+        t2 = other.hour, other.minute, other.second
+        return t1 < t2
+
+
 start = Time()
 start.hour = 9
 start.minute = 45
 start.second = 00
+
 
 # using function syntax, call print_time with dot notation
 # Time.print_time(start)
@@ -55,6 +62,9 @@ end = start.increment(1337)
 
 # time = Time(6,33)
 # time.print_time()
+
+print(start < end)
+
 
 
 class Point:
@@ -156,7 +166,7 @@ kanga.put_in_pouch('dollar')
 kanga.put_in_pouch(roo)
 roo.put_in_pouch('euro')
 
-print(kanga)
-
-print(roo)
+# print(kanga)
+#
+# print(roo)
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ApexVcsIndex">
+    <index-move-record>
+      <option name="firstPath" value="/mm/emma.txt" />
+      <option name="path" value="/MarkovAnalysis/emma.txt" />
+    </index-move-record>
+    <index-move-record>
+      <option name="firstPath" value="/mm/__init__.py" />
+      <option name="path" value="/MarkovAnalysis/__init__.py" />
+    </index-move-record>
+  </component>
+</project>
