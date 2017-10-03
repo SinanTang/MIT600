@@ -11,7 +11,7 @@ class Shape(object):
 
 
 class Square(Shape):
-    def __init__(self, h):
+    def __init__(self, h=1):
         """
         h: length of side of the square
         """
@@ -35,7 +35,7 @@ class Square(Shape):
 
 
 class Circle(Shape):
-    def __init__(self, radius):
+    def __init__(self, radius=1):
         """
         radius: radius of the circle
         """
@@ -62,19 +62,37 @@ class Circle(Shape):
 # Problem 1: Create the Triangle class
 #
 ## TO DO: Implement the `Triangle` class, which also extends `Shape`.
+class Triangle(Shape):
+    def __init__(self, h=1, base=1):
+        self.h = float(h)
+        self.base = float(base)
+
+    def __str__(self):
+        return "Triangle with base {:.1f} and height {:.1f}".format(self.base, self.h)
+
+    def area(self):
+        return 0.5 * self.h * self.base
+
+    def __eq__(self, other):
+        return type(other) == Triangle and self.base == other.base and self.h == other.h
+
+
+# print(type(tri)==Triangle)
+# print(str(tri))
 
 #
 # Problem 2: Create the ShapeSet class
 #
-## TO DO: Fill in the following code skeleton according to the
-##    specifications.
 
 class ShapeSet:
     def __init__(self):
         """
         Initialize any needed variables
+        self.members: {val:'Square',}
         """
-        ## TO DO
+        self.members = []
+        # self.types = []
+        self.place = None
 
     def addShape(self, sh):
         """
@@ -82,14 +100,25 @@ class ShapeSet:
         identical
         sh: shape to be added
         """
-        ## TO DO
+        # if type(sh) != (Triangle or Square or Circle): raise TypeError('not a shape')
+        # for member in self.members:
+        #     if sh == member: raise ValueError('duplicate shape')
+        if sh not in self.members:
+            self.members.append(sh)
 
     def __iter__(self):
         """
         Return an iterator that allows you to iterate over the set of
         shapes, one shape at a time
         """
-        ## TO DO
+        self.place = 0
+        return self
+
+    def __next__(self):
+        if self.place >= len(self.members):
+            raise StopIteration
+        self.place += 1
+        return self.members[self.place-1]
 
     def __str__(self):
         """
@@ -97,7 +126,42 @@ class ShapeSet:
         the string representation of each shape, categorized by type
         (circles, then squares, then triangles)
         """
-        ## TO DO
+        # self.members.sort()
+        mystring = ''
+        mystring += self.print_type(Circle)
+        mystring += self.print_type(Square)
+        mystring += self.print_type(Triangle)
+
+        return mystring
+
+    def print_type(self, tp):
+        mystring = ''
+        for member in self.members:
+            if type(member) == tp:
+                mystring += str(member) + '\n'
+        return mystring
+
+
+
+shapeset = ShapeSet()
+cir = Circle()
+cir2 = Circle(2)
+sq = Square()
+sq2 = Square(2)
+tri = Triangle(5,40)
+tri2 = Triangle(40,5)
+shapeset.addShape(tri)
+shapeset.addShape(tri2)
+shapeset.addShape(cir)
+shapeset.addShape(cir2)
+shapeset.addShape(sq)
+shapeset.addShape(sq2)
+
+# print(cir2.area())
+# print(shapeset)
+# print()
+# for shape in shapeset:
+#     print(str(shape)+'\n')
 
 
 #
@@ -108,8 +172,29 @@ def findLargest(shapes):
     Returns a tuple containing the elements of ShapeSet with the
        largest area.
     shapes: ShapeSet
+    # i think this is a better solution
     """
-    ## TO DO
+    areas = {}
+    for shape in shapes:
+         areas[str(shape)] = shape.area()
+
+    largest = 0
+    result = []
+    for area in areas:
+        if areas[area] > largest:
+            largest = areas[area]
+
+    for key, val in areas.items():
+        if val == largest:
+            result.append(key)
+    return tuple(result)
+
+# print(findLargest(shapeset))
+
+# large = findLargest(shapeset)
+# for i in large:
+#     print(i)
+
 
 
 #
@@ -121,4 +206,22 @@ def readShapesFromFile(filename):
     Creates and returns a ShapeSet with the shapes found.
     filename: string
     """
-    ## TO DO
+    ss = ShapeSet()
+
+    with open(filename) as f:
+        for line in f.readlines():
+            shape = line.rstrip().split(',')
+            if shape[0] == 'circle':
+                cir = Circle(float(shape[1]))
+                ss.addShape(cir)
+            elif shape[0] == 'square':
+                sq = Square(float(shape[1]))
+                ss.addShape(sq)
+            elif shape[0] == 'triangle':
+                tri = Triangle(float(shape[1]), float(shape[2]))
+                ss.addShape(tri)
+
+    return ss
+
+ss = readShapesFromFile('shapes.txt')
+print(ss)
