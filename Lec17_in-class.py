@@ -105,25 +105,33 @@ def performTrial(time, f):
     start = f.getLoc()
     distances = [0.0]
     for t in range(1, time+1):
-        f.getDrunk().move(f)
+        f.getDrunk().move(f) #what happens if the parens are left out
+        # AttributeError: 'function' object has no attribute 'move'
+        # .getDrunk() invokes the method on f, returns an instance of class Drunk.
+        # without parens, f.getDrunk is just a method
+        # method vs invocation of method
         newLoc = f.getLoc()
         distance = newLoc.getDist(start)
         distances.append(distance)
     return distances
 
 
-# drunk = Drunk('Homer Simpson')
-# for i in range(3):
-#     f = Field(drunk, Location(0,0))
-#     distances = performTrial(500, f)
-#     pylab.plot(distances)
-#
-# pylab.title('Homer\'s Random Walk')
-# pylab.xlabel('Time')
-# pylab.ylabel('Distance from Origin')
-#
+def firstTest():
+    drunk = Drunk('Homer Simpson')
+    for i in range(5):
+        f = Field(drunk, Location(0,0))
+        distances = performTrial(500, f)
+        # test with the simplest case which we know the answer
+        # performTrial(1, f)
+        pylab.plot(distances)
+    pylab.title('Homer\'s Random Walk')
+    pylab.xlabel('Time')
+    pylab.ylabel('Distance from Origin')
+
+# firstTest()
 # pylab.show()
 # assert False
+
 
 # to be more organised...
 def performSim(time, numTrials):
@@ -142,14 +150,18 @@ def ansQuest(maxTime, numTrials):
         tot = 0.0
         for distL in distLists:
             tot += distL[t]
-        means.append(tot/len(distL)) # bug? tot/len(distLists)
+        means.append(tot/len(distL)) # DEBUG -> tot/len(distLists)
+        # debugging: print('means',means)
     pylab.figure()
     pylab.plot(means)
     pylab.ylabel('distance')
     pylab.xlabel('time')
     pylab.title('Average Distance vs Time (' + str(len(distLists)) + ' trials)')
 
-ansQuest(500, 300)
+ansQuest(500, 100)
 pylab.show()
 
 
+# look at the labels on the axis
+# ask: if the answer makes sense / consistent with other evidence
+# be systematic when debugging: debug with a simple example
