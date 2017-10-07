@@ -1,4 +1,4 @@
-import string
+import string, random
 
 def file2words(filename):
     # translator = str.maketrans('','', string.punctuation)
@@ -52,9 +52,9 @@ def total_words(hist):
 
 def different_words(hist):
     return len(hist)
-
-print('total number of words:', total_words(hist))
-print('Number of different words:', different_words(hist))
+#
+# print('total number of words:', total_words(hist))
+# print('Number of different words:', different_words(hist))
 
 def most_common(hist):
     t = []
@@ -74,4 +74,87 @@ def print_most_common(hist, num=10):
     for freq, word in t[:num]:
         print(word, freq, sep='\t')
 
-print_most_common(hist, 20)
+# print_most_common(hist, 20)
+
+# look for words in the book that aren't in the word list:
+def substract(d1, d2):
+    res = {}
+    for key in d1:
+        if key not in d2:
+            res[key] = None
+    return res
+
+# words = process_file('words.txt')
+# diff = substract(hist,words)
+
+
+# Exercise 13.6
+# def line_to_set(filename):
+
+def set_substract(d1,d2):
+    s1 = set(d1)
+    s2 = set(d2)
+    res = s1.difference(s2)
+    return res
+
+# diff_set = set_substract(hist, words)
+
+
+## random words
+# not so efficient algorithm:
+def random_word(h):
+    t = []
+    for word, freq in h.items():
+        t.extend([word] * freq)
+    return random.choice(t)
+
+
+# a better algorithm:
+
+def cumulative_freq(freq_list):
+    res = []
+    for x in range(len(freq_list)):
+        cum = 0
+        for y in range(x+1):
+            cum += freq_list[y]
+        res.append(cum)
+    return res
+
+
+def bisearch(ls, num):
+    high = len(ls)-1
+    low = 0
+    guess = (high + low) // 2
+
+    count = 0
+    while count < 50:
+        if ls[guess] < num and ls[guess+1] > num:
+            ans = guess+1
+            return ans
+        if ls[guess+1] < num:
+            low = guess
+        if ls[guess+1] > num:
+            high = guess
+        count += 1
+        guess = (high + low) // 2
+
+    return 'iteration exceeds limitation'
+
+
+def main():
+    word_list = list(hist.keys())
+    freq_list = list(hist.values())
+
+    cum_ls = cumulative_freq(freq_list)
+    tot = sum(hist.values())
+    random_num = random.choice(range(1,tot+1))
+    index = bisearch(cum_ls, random_num)
+
+    print('random number:', random_num)
+
+    print('guessed index', index)
+    print('guessed word:', word_list[index])
+
+
+if __name__ == '__main__':
+    main()

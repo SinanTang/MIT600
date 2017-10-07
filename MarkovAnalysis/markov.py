@@ -1,16 +1,3 @@
-"""This module contains a code example related to
-
-Think Python, 2nd Edition
-by Allen Downey
-http://thinkpython2.com
-
-Copyright 2015 Allen Downey
-
-License: http://creativecommons.org/licenses/by/4.0/
-"""
-
-# from __future__ import print_function, division
-
 import sys
 import string
 import random
@@ -70,7 +57,7 @@ def process_word(word, order=2):
 
 
 def random_text(n=100):
-    """Generates random wordsfrom the analyzed text.
+    """Generates random words from the analyzed text.
 
     Starts with a random prefix from the dictionary.
 
