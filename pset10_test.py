@@ -2,6 +2,7 @@ import pset10
 import importlib; importlib.reload(pset10)
 from pset10 import *
 
+
 def isClose(float1, float2):
     """
     Helper function - are two floating point values close?
@@ -18,6 +19,7 @@ def testResult(boolean):
     else:
         print('Test Failed')
 
+
 def testHand():
     """
     Test the hand class. Add your own test cases
@@ -26,9 +28,19 @@ def testHand():
     h.update('bad')
     testResult(h.containsLetters('aabdd') and not h.isEmpty())
     h.update('dad')
+    # print(h)
     testResult(h.containsLetters('ab') or not h.isEmpty())
     h.update('ab')
+    # print(h.update('ab'), h)
     testResult(h.isEmpty())
+
+    h2 = Hand(7, {'a': 2, 'c': 1, 'd': 2, 's':2})
+    h2.update('as')
+    testResult(h2.containsLetters('addcs') and not h2.isEmpty())
+    h2.update('cs')
+    testResult(h2.containsLetters('add') or not h2.isEmpty())
+    testResult(h2.isEmpty())
+
 
 def testPlayer():
     """
@@ -40,6 +52,7 @@ def testPlayer():
     p.addPoints(12.)
     testResult(isClose(p.getPoints(), 17))
 
+
 def testComputerPlayer():
     """
     Test the ComputerPlayer class. Add your own test cases.
@@ -48,12 +61,13 @@ def testComputerPlayer():
     p = ComputerPlayer(1, Hand(6, {'c':1, 'a':1, 'b':1 ,'d':1, 'o':1, 'e':1}))
     testResult(getWordScore(p.pickBestWord(wordlist)) == getWordScore('abode'))
 
+
 def testAll():
     """
     Run all Tests
     """
 
-    print("Uncomment the tests in this file as you complete each problem.")
+    # print("Uncomment the tests in this file as you complete each problem.")
 
     # print('PROBLEM 2 -----------------------------------------')
     # testHand()

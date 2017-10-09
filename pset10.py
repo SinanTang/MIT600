@@ -1,22 +1,25 @@
 # Backend code for PS10
 
 import random
-import string
+from functools import total_ordering
+
 
 # Global Constants
 VOWELS = 'aeiou'
 CONSONANTS = 'bcdfghjklmnpqrstvwxyz'
-HAND_SIZE = 30
+HAND_SIZE = 10
 SCRABBLE_LETTER_VALUES = {
     'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1,
     'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1, 'o': 1, 'p': 3, 'q': 10, 'r': 1,
     's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10
 }
+
 HUMAN_SOLO = 0
 HUMAN_VS_HUMAN = 1
 HUMAN_VS_COMP = 2
 
 WORDLIST_FILENAME = "words.txt"
+
 
 def getFrequencyDict(sequence):
     """
@@ -27,8 +30,9 @@ def getFrequencyDict(sequence):
     """
     freq = {}
     for x in sequence:
-        freq[x] = freq.get(x,0) + 1
+        freq[x] = freq.get(x, 0) + 1
     return freq
+
 
 def getWordScore(word):
     """
@@ -45,6 +49,35 @@ def getWordScore(word):
         score += 50
     return score
 
+
+def is_valid_word(word, hand, wordlist):
+    """
+    Returns True if word is in the word_list and is entirely
+    composed of letters in the hand. Otherwise, returns False.
+    Does not mutate hand or word_list.
+
+    word: string
+    hand: dictionary (string -> int)
+    word_list: list of lowercase strings
+    """
+    freq = getFrequencyDict(word)
+    for letter in word:
+        if freq[letter] > hand.get(letter, 0):
+            return False
+    return word in wordlist
+
+
+def get_words_to_points(wordlist):
+    """
+    Return a dict that maps every word in word_list to its point value.
+    """
+    points_dict = {}
+    for word in wordlist:
+        points_dict[word] = getWordScore(word)
+    return points_dict
+
+
+
 #
 # Problem 2: Representing a Hand
 #
@@ -58,17 +91,18 @@ class Hand(object):
 
         postcondition: initializes a hand with random set of initial letters.
         """
-        num_vowels = handSize / 3
+        num_vowels = handSize // 3
         if initialHandDict is None:
             initialHandDict = {}
             for i in range(num_vowels):
-                x = VOWELS[random.randrange(0,len(VOWELS))]
+                x = VOWELS[random.randrange(0, len(VOWELS))]
                 initialHandDict[x] = initialHandDict.get(x, 0) + 1
             for i in range(num_vowels, handSize):
-                x = CONSONANTS[random.randrange(0,len(CONSONANTS))]
+                x = CONSONANTS[random.randrange(0, len(CONSONANTS))]
                 initialHandDict[x] = initialHandDict.get(x, 0) + 1
         self.initialSize = handSize
         self.handDict = initialHandDict
+
     def update(self, word):
         """
         Remove letters in word from this hand.
@@ -76,7 +110,13 @@ class Hand(object):
         word: The word (a string) to remove from the hand
         postcondition: Letters in word are removed from this hand
         """
-        # TODO
+        result = {}
+        freq = getFrequencyDict(word)
+        for letter in self.handDict:
+            result[letter] = self.handDict[letter] - freq.get(letter, 0)
+        self.handDict = result
+        return result
+
     def containsLetters(self, letters):
         """
         Test if this hand contains the characters required to make the input
@@ -85,14 +125,24 @@ class Hand(object):
         returns: True if the hand contains the characters to make up letters,
         False otherwise
         """
-        # TODO
+        freq = getFrequencyDict(letters)
+        res = True
+        for letter in freq:
+            if freq[letter] > self.handDict.get(letter, 0):
+                res = False
+        return res
+
     def isEmpty(self):
         """
         Test if there are any more letters left in this hand.
 
         returns: True if there are no letters remaining, False otherwise.
         """
-        # TODO
+        # if len(self.handDict) == 0: return True
+        # return False
+        if sum(self.handDict.values()) == 0: return True
+        return False
+
     def __eq__(self, other):
         """
         Equality test, for testing purposes
@@ -100,7 +150,13 @@ class Hand(object):
         returns: True if this Hand contains the same number of each letter as
         the other Hand, False otherwise
         """
-        # TODO
+        res = True
+        if len(self.handDict) != len(other.handDict): res = False
+        for letter in self.handDict:
+            if self.handDict[letter] != other.handDict.get(letter, 0):
+                res = False
+        return res
+
     def __str__(self):
         """
         Represent this hand as a string
@@ -113,10 +169,12 @@ class Hand(object):
                 string = string + letter + ' '
         return string
 
+
+
 #
 # Problem 3: Representing a Player
 #
-
+@total_ordering
 class Player(object):
     """
     General class describing a player.
@@ -136,13 +194,15 @@ class Player(object):
         self.points = 0.
         self.idNum = idNum
         self.hand = hand
+
     def getHand(self):
         """
         Return this player's hand.
 
         returns: the Hand object associated with this player.
         """
-        # TODO
+        return self.hand
+
     def addPoints(self, points):
         """
         Add points to this player's total score.
@@ -151,14 +211,16 @@ class Player(object):
 
         postcondition: this player's total score is increased by points
         """
-        # TODO
+        self.points += float(points)
+
     def getPoints(self):
         """
         Return this player's total score.
 
         returns: A float specifying this player's score
         """
-        # TODO
+        return self.points
+
     def getIdNum(self):
         """
         Return this player's ID number (either 1 for player 1 or
@@ -166,24 +228,35 @@ class Player(object):
 
         returns: An integer specifying this player's ID number.
         """
-        # TODO
-    def __cmp__(self, other):
-        """
-        Compare players by their scores.
+        return self.idNum
 
-        returns: 1 if this player's score is greater than other player's score,
-        -1 if this player's score is less than other player's score, and 0 if
-        they're equal.
-        """
-        # TODO
+    def __eq__(self, other):
+        return self.points == other.points
+
+    def __lt__(self, other):
+        return self.points < other.points
+
+    # def __cmp__(self, other):
+    #     """
+    #     Compare players by their scores.
+    #
+    #     returns: 1 if this player's score is greater than other player's score,
+    #     -1 if this player's score is less than other player's score, and 0 if
+    #     they're equal.
+    #     """
+    #     if self.points > other.points: return 1
+    #     elif self.points < other.points: return -1
+    #     else: return 0
+
     def __str__(self):
         """
         Represent this player as a string
 
         returns: a string representation of this player
         """
-        return 'Player %d\n\nScore: %.2f\n' % \
-               (self.getIdNum(), self.getPoints())
+        return 'Player {}\nScore: {:.2f}\n'.format(self.getIdNum(), self.getPoints())
+
+
 
 #
 # Problem 4: Representing a Computer Player
@@ -202,7 +275,19 @@ class ComputerPlayer(Player):
         returns: The best word (a string), given the computer player's hand and
         the wordlist
         """
-        # TODO
+        best_score = 0
+        best_word = ''
+        # make pointsDict outside class defi would make this method faster
+        # pointsDict = get_words_to_points(wordlist.wordlist)
+        for word in wordlist.wordlist:
+            if is_valid_word(word, self.hand.handDict, wordlist.wordlist) \
+                    and getWordScore(word) > best_score:
+                best_score = getWordScore(word)
+                best_word = word
+        if len(best_word) > 0: return best_word
+        else: return '.'
+
+
     def playHand(self, callback, wordlist):
         """
         Play a hand completely by passing chosen words to the callback
@@ -210,11 +295,15 @@ class ComputerPlayer(Player):
         """
         while callback(self.pickBestWord(wordlist)): pass
 
+
+
 class HumanPlayer(Player):
     """
     A Human player class.
     No methods are needed because everything is taken care of by the GUI.
     """
+
+
 
 class Wordlist(object):
     """
@@ -234,6 +323,7 @@ class Wordlist(object):
                 self.wordlist.append(line.strip().lower())
         finally:
             inputFile.close()
+
     def containsWord(self, word):
         """
         Test whether this wordlist includes word
@@ -244,10 +334,15 @@ class Wordlist(object):
         Wordlist
         """
         return word in self.wordlist
+
     def getList(self):
         return self.wordlist
 
+
+
 class EndHand(Exception): pass
+
+
 
 class Game(object):
     """
@@ -274,6 +369,7 @@ class Game(object):
                             HumanPlayer(2, hand2)]
         self.playerIndex = 0
         self.wordlist = wordlist
+
     def getCurrentPlayer(self):
         """
         Gets the Player object corresponding to the active player.
@@ -281,6 +377,7 @@ class Game(object):
         returns: The active Player object.
         """
         return self.players[self.playerIndex]
+
     def nextPlayer(self):
         """
         Changes the game state so that the next player is the active player.
@@ -292,6 +389,7 @@ class Game(object):
             return True
         else:
             return False
+
     def gameOver(self):
         """
         Determines if the game is over
@@ -300,6 +398,7 @@ class Game(object):
         otherwise
         """
         return self.playerIndex >= len(self.players)
+
     def tryWord(self, word):
         if word == '.':
             raise EndHand()
@@ -314,13 +413,17 @@ class Game(object):
             return points
         else:
             return None
+
     def getWinner(self):
         return max(self.players)
+
     def getNumPlayers(self):
         return len(self.players)
+
     def isTie(self):
         return len(self.players) > 1 and \
                self.players[0].getPoints() == self.players[1].getPoints()
+
     def __str__(self):
         """
         Convert this game object to a string
