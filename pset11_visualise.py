@@ -2,11 +2,12 @@
 # Visualization code for simulated robots.
 #
 
-
+from tkinter import *
 import math
 import time
+import matplotlib
+matplotlib.use("TkAgg")
 
-from tkinter import *
 
 class RobotVisualization:
     def __init__(self, num_robots, width, height, delay = 0.2):
