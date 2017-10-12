@@ -88,6 +88,7 @@ class Position(object):
 # p2 = p1.getNewPosition(90, 5)
 # print(p1, p2)
 
+
 # === Problems 1 and 2
 
 class RectangularRoom(object):
@@ -106,6 +107,7 @@ class RectangularRoom(object):
         width: an integer > 0
         height: an integer > 0
         """
+
         self.width = width
         self.height = height
         self.cleanTiles = []
@@ -117,9 +119,11 @@ class RectangularRoom(object):
 
         pos: a Position
         """
+
         cleanedTile = (int(pos.getX()), int(pos.getY()))
         if cleanedTile not in self.cleanTiles:
             self.cleanTiles.append(cleanedTile)
+
 
     def isTileCleaned(self, m, n):
         """
@@ -296,7 +300,6 @@ def testRobot():
 
 # === Problem 3
 
-
 def robotls(num_robots, room, speed, robot_type):
     robotls = []
     for i in range(num_robots):
@@ -409,7 +412,6 @@ def meanTime(list_of_lists):
         ttime += len(t)
     mean_time = ttime / len(list_of_lists)
     return mean_time
-
 
 def showPlot1():
     """
@@ -530,7 +532,6 @@ class RandomWalkRobot(BaseRobot):
         return 'Random Walk Robot'
 
 # runSimulation(2, 1, 5, 5, 1, 1, RandomWalkRobot, True)
-
 
 
 # === Problem 6
