@@ -53,7 +53,40 @@ class Position(object):
         new_y = old_y + delta_y
         return Position(new_x, new_y)
 
+    # def findX(self, angle, new_y):
+    #     old_x, old_y = self.getX(), self.getY()
+    #     delta_y = new_y - old_y
+    #     delta_x =  delta_y / math.tan(math.radians(angle))
+    #     new_x = old_x + delta_x
+    #     return Position(new_x, new_y)
+    # def findY(self, angle, new_x):
+    #     old_x, old_y = self.getX(), self.getY()
+    #     delta_x = new_x - old_x
+    #     delta_y =  delta_x * math.tan(math.radians(angle))
+    #     new_y = old_y + delta_y
+    #     return Position(new_x, new_y)
 
+    # def middlePositions(self, fp):
+    #     """
+    #     self is the the starting position
+    #     :param fp: final position
+    #     :return: the middle tiles (as Position) the path crosses
+    #     """
+    #     xn, yn = int(fp.getX()), int(fp.getY())
+    #     x0, y0 = int(self.getX()), int(self.getY())
+    #     delta_x = xn - x0
+    #     delta_y = yn - y0
+    #     if delta_y <= 1 and delta_x <= 1: return
+    #     middle = []
+    #     for x in range(1, delta_x):
+
+
+
+# p1 = Position(0,0)
+# new_x = p1.findX(30, 1)
+# print(new_x)
+# p2 = p1.getNewPosition(90, 5)
+# print(p1, p2)
 
 # === Problems 1 and 2
 
@@ -84,8 +117,9 @@ class RectangularRoom(object):
 
         pos: a Position
         """
-        if pos not in self.cleanTiles:
-            self.cleanTiles.append(pos)
+        cleanedTile = (int(pos.getX()), int(pos.getY()))
+        if cleanedTile not in self.cleanTiles:
+            self.cleanTiles.append(cleanedTile)
 
     def isTileCleaned(self, m, n):
         """
@@ -97,7 +131,7 @@ class RectangularRoom(object):
         n: an integer
         returns: True if (m, n) is cleaned, False otherwise
         """
-        if Position(m ,n) in self.cleanTiles:
+        if (int(m), int(n)) in self.cleanTiles:
             return True
         return False
 
@@ -219,10 +253,15 @@ class Robot(BaseRobot):
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
+        self.room.cleanTileAtPosition(self.getRobotPosition())
         newPos = self.p.getNewPosition(self.d, self.speed)
         if self.room.isPositionInRoom(newPos):
             self.p = newPos
+            # newPos.getX()
+            # newPos.getY()
             self.room.cleanTileAtPosition(newPos)
+            # if abs(newPos.getX()-self.getRobotPosition().getX())>1 or abs(newPos.getY()-self.getRobotPosition().getY())>1:
+            #     pass
         else:
             while True:
                 tmp_direction = random.randint(0, 360)
@@ -232,25 +271,24 @@ class Robot(BaseRobot):
             self.setRobotDirection(tmp_direction)
             self.room.cleanTileAtPosition(self.p)
 
+    def __str__(self):
+        return 'Robot'
+
 
 def testRobot():
     # testing above classes
-    room = RectangularRoom(5, 5)
-    robot = Robot(room, 0.5)
+    room = RectangularRoom(3, 3)
+    robot = Robot(room, 1)
     print('initial position & direction:')
-    print(robot.getRobotPosition(), robot.getRobotDirection())
+    print(robot.getRobotPosition(),robot.getRobotPosition().getX(), robot.getRobotDirection())
     print('\nstarts moving...')
     tiles = room.getNumTiles()
     c = 0
     while room.getNumCleanedTiles() / tiles < 1:
         robot.updatePositionAndClean()
-        print(room.getNumCleanedTiles())
         c += 1
+        # print(room.getNumCleanedTiles())
     print(c)
-    # for i in range(10):
-    #     robot.updatePositionAndClean()
-    #     print(robot.getRobotPosition(), robot.getRobotDirection())
-    #     print()
 
 # testRobot()
 
@@ -269,6 +307,9 @@ def robotls(num_robots, room, speed, robot_type):
 
 # room = RectangularRoom(10, 10)
 # robotls(3, room, 1, Robot)
+
+# def updateAndClean(robot):
+#     robot.updatePositionAndClean()
 
 def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
                   robot_type=Robot, visualize=False):
@@ -298,36 +339,40 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
     """
 
     all_trials = []
-    # tiles = room.getNumTiles()
-    anim = pset11_visualise.RobotVisualization(num_robots, width, height)
+    if visualize:
+        anim = pset11_visualise.RobotVisualization(num_robots, width, height, 0.4)
+
     for i in range(num_trials):
 
         room = RectangularRoom(width, height)
         tiles = room.getNumTiles()
         coverage_all_robots = []
         robotList = robotls(num_robots, room, speed, robot_type)
+        clean_percent = 0.0
 
-        while room.getNumCleanedTiles()/tiles < min_coverage:
+        while clean_percent < min_coverage:
             for robot in robotList:
                 robot.updatePositionAndClean()
-                anim.update(room, robotList)
-            coverage = room.getNumCleanedTiles() / tiles
-            coverage_all_robots.append(coverage)
+            # put the anim.update function outside inner loop
+            # so multiple robots look like move at the same time
+            if visualize: anim.update(room, robotList)
+            clean_percent = room.getNumCleanedTiles() / tiles
+            coverage_all_robots.append(clean_percent)
             # print(coverage_all_robots)
 
+        if visualize: anim.done()
         all_trials.append(coverage_all_robots)
-    anim.done()
 
-    # print('all trials: ', all_trials)
-    # for i in all_trials:
-    #     print('time-step needed:', len(i))
+    return all_trials
 
-## TODO: speed is not affecting the result ??
+## TODO: speed is not affecting the result -> robot only cleans the tile it arrives at
 
-runSimulation(1, 1, 5,5, 1, 1, Robot, True)
+# runSimulation(1, 1, 5,5, 1, 1, Robot, True)
 
+# print(runSimulation(2, 4, 5,5, 1, 3))
 
 
+# === Problem 4
 # === Provided function
 def computeMeans(list_of_lists):
     """
@@ -358,31 +403,103 @@ def computeMeans(list_of_lists):
     return means
 
 
-# === Problem 4
+def meanTime(list_of_lists):
+    ttime = 0
+    for t in list_of_lists:
+        ttime += len(t)
+    mean_time = ttime / len(list_of_lists)
+    return mean_time
+
+
 def showPlot1():
     """
     Produces a plot showing dependence of cleaning time on room size.
     """
-    # TODO: Your code goes here
+    meanTimeLs = []
+    for i in range(1,6):
+        mean = meanTime(runSimulation(1,1, 5*i,5*i, 0.75, 10))
+        meanTimeLs.append(mean)
+    # print(meanTimeLs)
+
+    pylab.plot([25, 100, 225, 400, 625], meanTimeLs)
+    # pylab.plot.axis(['5*5', '10*10', '15*15', '20*20', '25*25'])
+    pylab.xlabel('room area')
+    pylab.ylabel('mean timestep')
+    pylab.grid(True)
+    pylab.title('Mean cleaning time against room size for 75% coverage')
+    pylab.show()
+
+# showPlot1()
+
 
 def showPlot2():
     """
     Produces a plot showing dependence of cleaning time on number of robots.
     """
-    # TODO: Your code goes here
+    meanTimeLs = []
+    for i in range(1,11):
+        mean = meanTime(runSimulation(i,1, 25,25, 0.75, 10))
+        meanTimeLs.append(mean)
+    # print(meanTimeLs)
+    pylab.plot([1,2,3,4,5,6,7,8,9,10], meanTimeLs)
+    pylab.title('Mean cleaning time for various robot numbers\nroom area: 25*25\ncoverage: 75%')
+    pylab.xlabel('robot number')
+    pylab.ylabel('mean timestep')
+    pylab.grid(True)
+    pylab.show()
+
+# showPlot2()
+
 
 def showPlot3():
     """
     Produces a plot showing dependence of cleaning time on room shape.
     """
-    # TODO: Your code goes here
+    width_height_ratio = [20/20, 25/16, 40/10, 50/8, 80/5, 100/4]
+    meanTimeLs = []
+    m1 = meanTime(runSimulation(2, 1, 20,20, 0.75, 10))
+    m2 = meanTime(runSimulation(2, 1, 25,16, 0.75, 10))
+    m3 = meanTime(runSimulation(2, 1, 40,10, 0.75, 10))
+    m4 = meanTime(runSimulation(2, 1, 50,8, 0.75, 10))
+    m5 = meanTime(runSimulation(2, 1, 80,5, 0.75, 10))
+    m6 = meanTime(runSimulation(2, 1, 100,4, 0.75, 10))
+    meanTimeLs.extend([m1,m2,m3,m4,m5,m6])
+    print(meanTimeLs)
+    pylab.plot(width_height_ratio, meanTimeLs)
+    pylab.title('Mean cleaning time for 2 robots to clean various width-height ratio room\n room area: 400\ncoverage:75%')
+    pylab.xlabel('width-height ratio')
+    pylab.ylabel('mean timestep')
+    pylab.grid(True)
+    pylab.show()
+
+# showPlot3()
+
 
 def showPlot4():
     """
     Produces a plot showing cleaning time vs. percentage cleaned, for
     each of 1-5 robots.
     """
-    # TODO: Your code goes here
+    def draw(num_robots):
+        percentages = computeMeans(runSimulation(num_robots, 1, 25,25, 1,10))
+        d = {}
+        for i in range(len(percentages)):
+            d[i] = percentages[i]
+        timesteps = list(d.keys())
+        # param label for setting legend
+        pylab.plot(percentages, timesteps, label='{} robot(s)'.format(num_robots))
+        pylab.legend()
+
+    pylab.figure()
+    pylab.ylabel('mean timestep')
+    pylab.xlabel('cleaning coverage')
+    pylab.title('Mean cleaning time against the percentage of area cleaned\nroom area: 25*25')
+    pylab.grid(True)
+    for i in range(1, 6):
+        draw(i)
+    pylab.show()
+
+# showPlot4()
 
 
 # === Problem 5
@@ -393,6 +510,26 @@ class RandomWalkRobot(BaseRobot):
     strategy: it chooses a new direction at random after each
     time-step.
     """
+    def updatePositionAndClean(self):
+        self.room.cleanTileAtPosition(self.getRobotPosition())
+        random_direction = random.randint(0, 360)
+        random_position = self.p.getNewPosition(random_direction, self.speed)
+        if self.room.isPositionInRoom(random_position):
+            self.p = random_position
+            self.room.cleanTileAtPosition(random_position)
+        else:
+            while True:
+                tmp_direction = random.randint(0,360)
+                tmp_position = self.p.getNewPosition(tmp_direction, self.speed)
+                if self.room.isPositionInRoom(tmp_position): break
+            self.setRobotPosition(tmp_position)
+            self.setRobotDirection(tmp_direction)
+            self.room.cleanTileAtPosition(self.p)
+
+    def __str__(self):
+        return 'Random Walk Robot'
+
+# runSimulation(2, 1, 5, 5, 1, 1, RandomWalkRobot, True)
 
 
 
@@ -401,5 +538,40 @@ class RandomWalkRobot(BaseRobot):
 def showPlot5():
     """
     Produces a plot comparing the two robot strategies.
+    compare different room area / different robot numbers
     """
-    # TODO: Your code goes here
+    ## function doesn't print str name of robot_type
+    # def draw(robot_type):
+    #     meanTimeLs = []
+    #     for i in range(1,6):
+    #         mean = meanTime(runSimulation(1,1, 5*i,5*i, 0.75, 50, robot_type))
+    #         meanTimeLs.append(mean)
+    #     pylab.plot([25, 100, 225, 400, 625], meanTimeLs, label='{} cleaning'.format(robot_type))
+
+    meanTimeLs_robot = []
+    for i in range(1,6):
+        mean = meanTime(runSimulation(1,1, 5*i,5*i, 0.75, 50))
+        meanTimeLs_robot.append(mean)
+
+    meanTimeLs_randomrobot = []
+    for i in range(1,6):
+        mean = meanTime(runSimulation(1,1, 5*i,5*i, 0.75, 50, RandomWalkRobot))
+        meanTimeLs_randomrobot.append(mean)
+
+    pylab.figure()
+    # draw(Robot)
+    # draw(RandomWalkRobot)
+    pylab.plot([25, 100, 225, 400, 625], meanTimeLs_robot, label='Robot')
+    pylab.plot([25, 100, 225, 400, 625], meanTimeLs_randomrobot, label='Random Walk Robot')
+    pylab.legend()
+
+    pylab.xlabel('room area')
+    pylab.ylabel('mean timestep')
+    pylab.grid(True)
+    pylab.title('Mean cleaning time against room size with different robots\ncleaned coverage: 75%')
+    pylab.show()
+
+showPlot5()
+
+# as room size increases, RandomWalkRobot cleans increasingly faster than Robot.
+# RandomWalkRobot performs better.
