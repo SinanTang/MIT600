@@ -118,6 +118,6 @@ def findPi(numDarts, shouldPlot=False):
     print('Estimated value of pi with', formatInt(numDarts), 'darts:', piGuess)
 
 
-# findPi(10000, True)
-findPi(100000000)
+findPi(10000, True)
+# findPi(100000000)
 show()
