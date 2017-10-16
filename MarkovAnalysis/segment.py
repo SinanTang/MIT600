@@ -1,4 +1,4 @@
-import os,time
+import os, time
 
 from nltk.tokenize.stanford_segmenter import StanfordSegmenter
 start = time.time()
@@ -14,7 +14,15 @@ seg.default_config('zh')
 # print(seg.segment(sent))
 
 fp = "chinese.txt"
-print(seg.segment_file(fp))
+tokenstr = seg.segment_file(fp)
+token_ls = list(tokenstr)
+print(len(token_ls), '\n', tokenstr, '\n', token_ls)
+
+# with open('chinese_tokens.txt', 'a') as writef:
+#     for line in token_ls:
+#         writef.write(line.rstrip().split())
+
+# print(tokens, '\n', type(tokens)) # class 'str'
 
 end = time.time()
 

@@ -18,20 +18,20 @@ class MarkovZh:
         self.suffix_map = {}
         self.prefix = ()
 
-    def process_file(self, filename, order=2):
+    def process_file(self, filename, order=1):
         fp = open(filename)
-        self.skip_gutenberg_header(fp)
+        # self.skip_gutenberg_header(fp)
 
         for line in fp:
             for word in line.rstrip().split():
                 self.process_word(word, order)
 
-    def skip_gutenberg_header(self, fp):
-        for line in fp:
-            if line.startswith('*END*THE SMALL PRINT!'):
-                break
+    # def skip_gutenberg_header(self, fp):
+    #     for line in fp:
+    #         if line.startswith('*END*THE SMALL PRINT!'):
+    #             break
 
-    def process_word(self, word, order=2):
+    def process_word(self, word, order=1):
         if len(self.prefix) < order:
             self.prefix += (word,)
             return
@@ -58,7 +58,7 @@ class MarkovZh:
 
 
 
-def main(script, filename='.txt', n=100, order=2):
+def main(script, filename='chinese_tokens.txt', n=50, order=1):
     try:
         n = int(n)
         order = int(order)
@@ -69,5 +69,6 @@ def main(script, filename='.txt', n=100, order=2):
         markov.process_file(filename, order)
         markov.random_text(n)
 
-# if __name__ == '__main__':
-#     main(*sys.argv)
+
+if __name__ == '__main__':
+    main(*sys.argv)
