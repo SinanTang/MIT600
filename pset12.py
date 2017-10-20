@@ -1,9 +1,10 @@
 # 6.00 Problem Set 12
 #
 
-import numpy
+import numpy as np
 import random
 import pylab
+from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 
 
 class NoChildException(Exception):
@@ -394,7 +395,7 @@ class Patient(SimplePatient):
         for v in self.viruses:
             resistAll = True
             for drug in drugResist:
-                if not v.resistances.get(drug, 1): resistAll = False
+                if not v.resistances.get(drug, 0): resistAll = False
             if resistAll:
                 resistPop.append(v)
         return len(resistPop)
@@ -521,7 +522,7 @@ def problem4():
         pylab.legend()
         pylab.title('Resistant Virus Simulation with Drug Treatment\n{} Timestep'.format(timestep))
 
-        pylab.show()
+        # pylab.show()
 
     runTrial(150)
 
@@ -547,17 +548,18 @@ def problem5():
     for i in range(100):
         virus = ResistantVirus(0.1, 0.05, {'guttagonol':False}, 0.005)
         virus_ls.append(virus)
-    patient = Patient(virus_ls, 1000)
+    # patient = Patient(virus_ls, 1000)
 
     def runTrial(timestep=150):
         """a single trial under 4 conditions:
         timestep: 300, 150, 75, 0
         return: final virus population
         """
-        virus_before = [len(virus_ls)]
+        # Be careful about the initial state of a variable!
+        # patient should be moved inside the function, b/c it needs to start at baseline every trial
+        patient = Patient(virus_ls, 1000)
         for i in range(timestep):
-            virus_pop = patient.update()
-            virus_before.append(virus_pop)
+            patient.update()
 
         new_virus_ls = patient.viruses
         patient.addPrescription('guttagonol')
@@ -567,29 +569,83 @@ def problem5():
             virus_after.append(virus_pop)
         return virus_after[-1]
 
-    def runSim(num_trials, timestep):
-        pylab.figure()
+    # for i in range(2,10):
+    #     final = runTrial(150)
+    #     print(final)
 
+    def runSim(num_trials, timestep):
+        # fig = pylab.subplot()
+        pylab.figure()
         final_virus_pop_ls = []
         for i in range(num_trials):
             final_virus_pop = runTrial(timestep)
+            # print('final virus population', final_virus_pop)
             final_virus_pop_ls.append(final_virus_pop)
             if i%50 == 0:
                 print('Delay: {}, Trial: {}, Virus Population: {}'.format(timestep, i, final_virus_pop))
 
+        cured = 0
+        for i in final_virus_pop_ls:
+            if i < 50: cured += 1
+        cured_per = cured / len(final_virus_pop_ls)
+
         pylab.hist(final_virus_pop_ls)
+
+        # changing the color of x/y labels
+        # ybox0 = TextArea('Number of Patients', textprops=dict(color='y', size=12, rotation=90, ha='left', va='bottom'))
+        # ybox = VPacker(children=[ybox0], align='bottom', pad=0, sep=5)
+        # anchored_ybox = AnchoredOffsetbox(loc=8, child=ybox, pad=0, frameon=False,
+        #                                   bbox_to_anchor=(-0.10, 0.3), bbox_transform=fig.transAxes,
+        #                                   borderpad=0.)
+        #
+        # xbox0 = TextArea('Final Virus Population - {}% cured'.format(cured), textprops=dict(color='y', size=12, rotation=0, ha='left', va='bottom'))
+        # xbox = VPacker(children=[xbox0], align='bottom', pad=0, sep=5)
+        # anchored_xbox = AnchoredOffsetbox(loc=8, child=xbox, pad=0, frameon=False,
+        #                                   bbox_to_anchor=(0.45, -0.13), bbox_transform=fig.transAxes, borderpad=0.)
+
+        # fig.add_artist(anchored_ybox)
+        # fig.add_artist(anchored_xbox)
+
         pylab.title('Final Virus Population with {} Time Step Delay'.format(timestep))
-        pylab.xlabel('Final Virus Population')
+        pylab.xlabel('Final Virus Population - {}% cured'.format(cured_per))
         pylab.ylabel('Number of Patients')
 
-    runSim(200, 0)
-    runSim(200, 75)
-    runSim(200, 150)
-    runSim(200, 300)
+    runSim(100, 0)
+    runSim(100, 75)
+    runSim(100, 150)
+    runSim(100, 300)
 
-    pylab.show()
+    # pylab.show()
 
-problem5()
+# problem5()
+
+
+# virus_ls = []
+# for i in range(100):
+#     virus = ResistantVirus(0.1, 0.05, {'guttagonol':False}, 0.005)
+#     virus_ls.append(virus)
+# patient = Patient(virus_ls, 1000)
+
+# def runTrial(timestep=150):
+#     """a single trial under 4 conditions:
+#     timestep: 300, 150, 75, 0
+#     return: final virus population
+#     """
+#     virus_before = [len(virus_ls)]
+#     for i in range(timestep):
+#         virus_pop = patient.update()
+#         # virus_before.append(virus_pop)
+#
+#     new_virus_ls = patient.viruses
+#     patient.addPrescription('guttagonol')
+#     virus_after = [len(new_virus_ls)]
+#     for i in range(150):
+#         virus_pop = patient.update()
+#         virus_after.append(virus_pop)
+#     final = virus_after[-1]
+#     return final
+
+# print(runTrial(300))
 
 
 #
@@ -607,8 +663,60 @@ def problem6():
     150, 75, 0 timesteps between adding drugs (followed by an additional 150
     timesteps of simulation).
     """
-    
+    virus_ls = []
+    for i in range(100):
+        virus = ResistantVirus(0.1, 0.05, {'guttagonol':False, 'grimpex':False}, 0.005)
+        virus_ls.append(virus)
 
+    def runTrial(timestep=150):
+        """a single trial under 4 conditions:
+        timestep: 300, 150, 75, 0
+        return: final virus population
+        """
+        patient = Patient(virus_ls, 1000)
+        for i in range(150):
+            patient.update()
+        patient.addPrescription('guttagonol')
+
+        for i in range(timestep):
+            patient.update()
+        patient.addPrescription('grimpex')
+
+        new_virus_ls = patient.viruses
+        virus_after = [len(new_virus_ls)]
+        for i in range(150):
+            virus_pop = patient.update()
+            virus_after.append(virus_pop)
+        return virus_after[-1]
+
+    def runSim(num_trials, timestep):
+        pylab.figure()
+
+        final_virus_pop_ls = []
+        for i in range(num_trials):
+            final_virus_pop = runTrial(timestep)
+            final_virus_pop_ls.append(final_virus_pop)
+            if i%5 == 0:
+                print('Delay: {}, Trial: {}, Virus Population: {}'.format(timestep, i, final_virus_pop))
+
+        cured = 0
+        for i in final_virus_pop_ls:
+            if i < 50: cured += 1
+        cured_per = cured / len(final_virus_pop_ls)
+
+        pylab.hist(final_virus_pop_ls)
+        pylab.title('Final Virus Population with Two-Drug Treatment\n{} Time Step Delay\n{} Trials'.format(timestep, num_trials))
+        pylab.xlabel('Final Virus Population - {}% cured'.format(cured_per))
+        pylab.ylabel('Number of Patients')
+
+    runSim(30, 0)
+    runSim(30, 75)
+    runSim(30, 150)
+    runSim(30, 300)
+
+    # pylab.show()
+
+# problem6()
 
 
 
@@ -616,7 +724,7 @@ def problem6():
 # PROBLEM 7
 #
 
-def problem7():
+def sim_delay():
     """
     Run simulations and plot graphs examining the relationship between
     administration of multiple drugs and patient outcome.
@@ -625,3 +733,133 @@ def problem7():
     simulation with a 300 time step delay between administering the 2 drugs and
     a simulations for which drugs are administered simultaneously.
     """
+    virus_ls = []
+    for i in range(100):
+        virus = ResistantVirus(0.1, 0.05, {'guttagonol': False, 'grimpex': False}, 0.005)
+        virus_ls.append(virus)
+
+    def runTrial(timestep=300):
+        """a single trial under 4 conditions:
+        timestep: 300, 150, 75, 0
+        return: final virus population
+        """
+        patient = Patient(virus_ls, 1000)
+        virus_pop_ls = [len(virus_ls)]
+        virus_resist_gut = [patient.getResistPop(['guttagonol'])]
+        virus_resist_gri = [patient.getResistPop(['grimpex'])]
+        virus_resist_all = [patient.getResistPop(['guttagonol', 'grimpex'])]
+
+        def updates(n):
+            for i in range(n):
+                virus_pop = patient.update()
+                virus_pop_ls.append(virus_pop)
+                virus_resist_gut.append(patient.getResistPop(['guttagonol']))
+                virus_resist_gri.append(patient.getResistPop(['grimpex']))
+                virus_resist_all.append(patient.getResistPop(['guttagonol', 'grimpex']))
+
+        updates(150)
+
+        patient.addPrescription('guttagonol')
+
+        updates(timestep)
+
+        patient.addPrescription('grimpex')
+
+        updates(150)
+
+        return virus_pop_ls, virus_resist_gut, virus_resist_gri, virus_resist_all
+
+    # def runSim(num_trials):
+    #
+    #     virus_pop_ls, virus_resist_gut, virus_resist_gri, virus_resist_all = runTrial()
+    #     l1_tot = 0
+    #     for i in num_trials:
+    #         l1, l2, l3, l4 = runTrial()
+    #         l1_tot += l1
+    #
+    #     virus_pop_ls = l1_tot / num_trials
+
+    virus_pop_ls, virus_resist_gut, virus_resist_gri, virus_resist_all = runTrial()
+    pylab.figure()
+    pylab.plot(virus_pop_ls, label='Virus Population')
+    pylab.plot(virus_resist_all, label='Virus resistant to both drugs')
+    pylab.plot(virus_resist_gri, label='Virus resistant to grimpex')
+    pylab.plot(virus_resist_gut, label='Virus resistant to guttagonol')
+    pylab.legend()
+    pylab.title('Virus Population Dynamics with 2 Drugs')
+    pylab.xlabel('Time Step')
+    pylab.ylabel('Virus Population')
+
+    # pylab.show()
+
+# sim_delay()
+
+
+def sim_simul():
+    virus_ls = []
+    for i in range(100):
+        virus = ResistantVirus(0.1, 0.05, {'guttagonol': False, 'grimpex': False}, 0.005)
+        virus_ls.append(virus)
+
+    def runTrial():
+        """a single trial under 4 conditions:
+        timestep: 300, 150, 75, 0
+        return: final virus population
+        """
+        patient = Patient(virus_ls, 1000)
+        virus_pop_ls = [len(virus_ls)]
+        virus_resist_gut = [patient.getResistPop(['guttagonol'])]
+        virus_resist_gri = [patient.getResistPop(['grimpex'])]
+        virus_resist_all = [patient.getResistPop(['guttagonol', 'grimpex'])]
+
+        def updates(n):
+            for i in range(n):
+                virus_pop = patient.update()
+                virus_pop_ls.append(virus_pop)
+                virus_resist_gut.append(patient.getResistPop(['guttagonol']))
+                virus_resist_gri.append(patient.getResistPop(['grimpex']))
+                virus_resist_all.append(patient.getResistPop(['guttagonol', 'grimpex']))
+
+        updates(150)
+
+        patient.addPrescription('guttagonol')
+        patient.addPrescription('grimpex')
+
+        updates(150)
+
+        return virus_pop_ls, virus_resist_gut, virus_resist_gri, virus_resist_all
+
+    virus_pop_ls, virus_resist_gut, virus_resist_gri, virus_resist_all = runTrial()
+    pylab.figure()
+    pylab.plot(virus_pop_ls, label='Virus Population')
+    pylab.plot(virus_resist_all, label='Virus resistant to both drugs')
+    pylab.plot(virus_resist_gri, label='Virus resistant to grimpex')
+    pylab.plot(virus_resist_gut, label='Virus resistant to guttagonol')
+    pylab.legend()
+    pylab.title('Virus Population Dynamics with 2 Drugs')
+    pylab.xlabel('Time Step')
+    pylab.ylabel('Virus Population')
+
+    # pylab.show()
+
+sim_simul()
+
+pylab.show()
+
+
+
+#
+# Problem 8: Patient Non-compliance
+#
+"""
+In the Patient class, modify the method getPrescriptions(), 
+add another parameter *prob* - 
+the probablity the patient doesn't take the drug. 
+prob is a float between .0 and 1.0 inclusive.
+
+In getPrescriptions(), Use random.random() to model the condition 
+whether the drug is in Patient.drugs or not.
+So in update() method in Patient class, the variable activeDrugs 
+will change accordingly.
+
+"""
